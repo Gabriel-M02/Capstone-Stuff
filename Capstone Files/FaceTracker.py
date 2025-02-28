@@ -26,7 +26,7 @@ with mp_face_detection.FaceDetection(min_detection_confidence=0.5) as face_detec
         # Process the frame to detect faces
         results = face_detection.process(rgb_frame)
 
-        # If faces are detected, scramble their regions and highlight them
+        # If faces are detected, track them
         if results.detections:
             for detection in results.detections:
 
@@ -48,7 +48,7 @@ with mp_face_detection.FaceDetection(min_detection_confidence=0.5) as face_detec
                 # Extract the face region
                 face = frame[y:y+h_box, x:x+w_box]
 
-                # Place the scrambled face back into the frame
+                # Place the tracked face back into the frame
                 frame[y:y+h_box, x:x+w_box] = face
         else:
             # Optionally handle the case where no faces are detected
