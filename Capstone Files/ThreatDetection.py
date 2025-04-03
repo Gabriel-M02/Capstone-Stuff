@@ -123,7 +123,7 @@ while True:
     draw_hud(nv_frame, detections)
 
     # Display
-    cv2.imshow("Night Vision Goggles - HUD", nv_frame)
+    cv2.imshow("EVST NVG Prototype MK 1", nv_frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
