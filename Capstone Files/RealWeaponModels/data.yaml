@@ -1,0 +1,14 @@
+train: RealWeaponModel/train/images
+val: RealWeaponModel/valid/images
+test: RealWeaponModel/test/images  
+
+nc: 1
+names: ['gun']
+
+
+roboflow:
+  workspace: instituto-superior-de-engenharia-de-coimbra-bgn4r
+  project: gun-surveilence-v2
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/instituto-superior-de-engenharia-de-coimbra-bgn4r/gun-surveilence-v2/dataset/1
