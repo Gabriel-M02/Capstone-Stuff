@@ -6,7 +6,7 @@ from ultralytics import YOLO
 import mediapipe as mp
 
 # Load custom YOLOv8 model trained to detect guns
-model = YOLO("NerfPrototype/runs/detect/train3/weights/best.pt")
+model = YOLO("EVST_DataModelPrototypemk1/runs/detect/train/weights/best.pt")
 
 # Initialize MediaPipe Pose
 mp_pose = mp.solutions.pose
@@ -36,7 +36,7 @@ def apply_night_vision_effect(frame):
     colored = cv2.applyColorMap(enhanced, cv2.COLORMAP_OCEAN)
     return colored
 
-def detect_guns(frame, threshold=0.8):
+def detect_guns(frame, threshold=0.6):
     results = model(frame)
     detections = results[0].boxes.data.cpu().numpy() if results[0].boxes.data.numel() > 0 else []
     
