@@ -6,7 +6,7 @@ from ultralytics import YOLO
 import mediapipe as mp
 
 # Load custom YOLOv8 model trained to detect guns
-model = YOLO("EVST_DataModelPrototype/runs/detect/train5/weights/best.pt")
+model = YOLO("NerfPrototype/runs/detect/train3/weights/best.pt")
 
 # Initialize MediaPipe Pose
 mp_pose = mp.solutions.pose
