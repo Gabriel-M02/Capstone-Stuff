@@ -55,7 +55,7 @@ def detect_guns(frame, threshold=0.8):
 
 
 # Initialize capture
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 smoothed_bbox = None
 tracking_with_pose = False
 last_pose_timestamp = time.time()
