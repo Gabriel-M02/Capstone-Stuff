@@ -36,7 +36,7 @@ def apply_night_vision_effect(frame):
     colored = cv2.applyColorMap(enhanced, cv2.COLORMAP_OCEAN)
     return colored
 
-def detect_guns(frame, threshold=0.6):
+def detect_guns(frame, threshold=0.8):
     results = model(frame)
     detections = results[0].boxes.data.cpu().numpy() if results[0].boxes.data.numel() > 0 else []
     
