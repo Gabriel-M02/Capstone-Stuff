@@ -8,6 +8,7 @@ import mediapipe as mp
 
 # Primary Program for EVST Solutions
 # Load custom YOLOv8 model trained to detect guns
+# NEW OBJECTIVE - MODIFY FOR TWO CAMERA INPUT
 model = YOLO("EVST_DataModelPrototypemk1/runs/detect/train/weights/best.pt")
 
 # Initialize MediaPipe Pose
