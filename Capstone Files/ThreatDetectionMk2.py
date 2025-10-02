@@ -7,15 +7,16 @@ import mediapipe as mp
 
 
 # Primary Program for EVST Solutions
-# Load custom YOLOv8 model trained to detect guns
 # NEW OBJECTIVE - MODIFY FOR TWO CAMERA INPUT
+
+# Path to the Data Model for Weapon Detection - By Gabriel M
 model = YOLO("EVST_DataModelPrototypemk1/runs/detect/train/weights/best.pt")
 
 # Initialize MediaPipe Pose
 mp_pose = mp.solutions.pose
 pose = mp_pose.Pose(min_detection_confidence=0.6, min_tracking_confidence=0.6)
 
-# Battery HUD
+# Battery HUD - By Jacob O'Hearon
 def draw_battery_status(frame, x=540, y=10):
     battery = psutil.sensors_battery()
     if battery is None:
@@ -39,6 +40,7 @@ def apply_night_vision_effect(frame):
     colored = cv2.applyColorMap(enhanced, cv2.COLORMAP_OCEAN)
     return colored
 
+# Weapon Detection Function - Arsalan Salam
 def detect_guns(frame, threshold=0.8):
     results = model(frame)
     detections = results[0].boxes.data.cpu().numpy() if results[0].boxes.data.numel() > 0 else []
@@ -57,14 +59,14 @@ def detect_guns(frame, threshold=0.8):
     return False, detections  # Detections present, but no valid guns
 
 
-# Initialize capture
+# Initialize capture - By Waleed Khan
 cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 smoothed_bbox = None
 tracking_with_pose = False
 last_pose_timestamp = time.time()
 prev_time = time.time()
 
-# Main loop
+# Main loop - by Gabriel Montemayor
 while True:
     ret, frame = cap.read()
     if not ret:
