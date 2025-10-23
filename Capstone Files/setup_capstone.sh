@@ -1,43 +1,39 @@
 #!/bin/bash
 
-echo "🔄 Updating & upgrading system..."
+echo "Updating & upgrading system..."
 sudo apt update && sudo apt full-upgrade -y
 
-echo "🧱 Installing system dependencies..."
+echo "Installing system dependencies..."
 sudo apt install -y \
   git \
   python3 \
-  python3-venv \
   python3-pip \
-  libatlas-base-dev \
-  libjasper-dev \
+  python3-venv \
   libqtgui4 \
   libqt4-test \
-  libilmbase-dev \
-  libopenexr-dev \
-  libgstreamer1.0-dev \
+  libv4l-dev \
   libavcodec-dev \
   libavformat-dev \
   libswscale-dev \
-  libv4l-dev \
   libxvidcore-dev \
   libx264-dev \
   v4l-utils
 
-echo "📁 Cloning GitHub repo (Capstone-Stuff)..."
+
+echo "Cloning GitHub repo (Capstone-Stuff)..."
 if [ ! -d "Capstone-Stuff" ]; then
   git clone https://github.com/Gabriel-M02/Capstone-Stuff.git
 else
-  echo "✅ Repo already exists. Skipping clone."
+  echo "Repo already exists. Skipping clone."
 fi
 
-echo "🐍 Creating virtual environment..."
+echo "Creating virtual environment..."
 python3 -m venv capstone-venv
 
-echo "⚡ Activating virtual environment..."
+echo "Activating virtual environment..."
 source capstone-venv/bin/activate
 
-echo "📦 Installing Python libraries individually..."
+echo "Installing Python libraries individually..."
 
 pip install --upgrade pip
 
@@ -55,9 +51,9 @@ pip install ultralytics==8.0.20
 # PyTorch (CPU for Pi)
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
-echo "✅ All installations complete!"
+echo "All installations complete!"
 
 echo ""
-echo "🚀 To activate the environment and run your HUD:"
-echo "    source capstone-venv/bin/activate"
-echo "    python3 Capstone-Stuff/ThreatDetectionMK2.py"
+echo "To activate the environment and run your HUD:"
+echo "source capstone-venv/bin/activate"
+echo "python3 Capstone-Stuff/ThreatDetectionMK2.py"
