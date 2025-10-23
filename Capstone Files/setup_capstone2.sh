@@ -1,53 +1,63 @@
 #!/bin/bash
 
-echo "📦 Updating system packages..."
+echo "🔄 Updating & upgrading system..."
 sudo apt update && sudo apt full-upgrade -y
 
-echo "🔧 Installing required system packages..."
+echo "🧱 Installing system dependencies..."
 sudo apt install -y \
-    git \
-    python3 \
-    python3-venv \
-    python3-pip \
-    libatlas-base-dev \
-    libjasper-dev \
-    libqtgui4 \
-    libqt4-test \
-    libilmbase-dev \
-    libopenexr-dev \
-    libgstreamer1.0-dev \
-    libavcodec-dev \
-    libavformat-dev \
-    libswscale-dev \
-    libv4l-dev \
-    libxvidcore-dev \
-    libx264-dev
+  git \
+  python3 \
+  python3-venv \
+  python3-pip \
+  libatlas-base-dev \
+  libjasper-dev \
+  libqtgui4 \
+  libqt4-test \
+  libilmbase-dev \
+  libopenexr-dev \
+  libgstreamer1.0-dev \
+  libavcodec-dev \
+  libavformat-dev \
+  libswscale-dev \
+  libv4l-dev \
+  libxvidcore-dev \
+  libx264-dev \
+  v4l-utils
 
-echo "📁 Cloning Capstone GitHub repository if not already present..."
+echo "📁 Cloning GitHub repo (Capstone-Stuff)..."
 if [ ! -d "Capstone-Stuff" ]; then
-    git clone https://github.com/Gabriel-M02/Capstone-Stuff.git
+  git clone https://github.com/Gabriel-M02/Capstone-Stuff.git
 else
-    echo "✅ Repository already exists. Skipping clone."
+  echo "✅ Repo already exists. Skipping clone."
 fi
 
-echo "🧪 Creating Python virtual environment..."
+echo "🐍 Creating virtual environment..."
 python3 -m venv capstone-venv
 
-echo "📂 Activating virtual environment and installing Python requirements..."
+echo "⚡ Activating virtual environment..."
 source capstone-venv/bin/activate
 
-echo "⬇️ Installing Python dependencies..."
+echo "📦 Installing Python libraries individually..."
+
 pip install --upgrade pip
 
-# Install individual packages directly
-pip install opencv-python-headless==4.8.0.76
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-pip install numpy mediapipe
+# Core libraries
+pip install opencv-python
+pip install numpy
+pip install psutil
+
+# MediaPipe
+pip install mediapipe
+
+# Ultralytics + YOLOv8
 pip install ultralytics==8.0.20
-pip install matplotlib pyqt5
 
-echo "✅ Setup complete!"
+# PyTorch (CPU for Pi)
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
-echo -e "\n📌 To activate the virtual environment and run the program later:"
+echo "✅ All installations complete!"
+
+echo ""
+echo "🚀 To activate the environment and run your HUD:"
 echo "    source capstone-venv/bin/activate"
 echo "    python3 Capstone-Stuff/ThreatDetectionMK2.py"
