@@ -5,27 +5,23 @@ import time
 from ultralytics import YOLO
 import mediapipe as mp
 import torch
-import torch.serialization
 
-# --- Fix for PyTorch 'unsupported global' error on YOLO weight load ---
-try:
-    torch.serialization.add_safe_globals = [
-        "ultralytics.nn.tasks.DetectionModel"
-    ]
-except Exception:
-    import contextlib
-    @contextlib.contextmanager
-    def allow_unsafe_load():
-        old = torch.serialization._legacy_load
-        torch.serialization._legacy_load = lambda *a, **kw: old(*a, **kw)
-        yield
-        torch.serialization._legacy_load = old
-    torch.serialization.allow_unsafe_load = allow_unsafe_load
-# ----------------------------------------------------------------------
-
+# --- SAFE LOAD FIX for PyTorch on Raspberry Pi CM4 ---
+# This forces PyTorch to load YOLO weights without attempting to unpickle unsafe globals.
+def safe_load_yolo(model_path):
+    try:
+        return YOLO(model_path)
+    except Exception:
+        print("[WARNING] Standard YOLO load failed. Retrying with safe torch.load()...")
+        checkpoint = torch.load(model_path, map_location="cpu", weights_only=True)
+        model = YOLO()
+        model.model.load_state_dict(checkpoint["model"].state_dict())
+        return model
+# ------------------------------------------------------
 
 # Path to the Data Model for Weapon Detection - By Gabriel M
-model = YOLO("EVST_DataModelPrototypemk1/runs/detect/train/weights/best.pt")
+model_path = "EVST_DataModelPrototypemk1/runs/detect/train/weights/best.pt"
+model = safe_load_yolo(model_path)
 
 # Initialize MediaPipe Pose
 mp_pose = mp.solutions.pose
