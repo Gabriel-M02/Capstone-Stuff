@@ -8,10 +8,11 @@ import torch
 import torch.serialization
 
 # --- Fix for PyTorch 'unsupported global' error on YOLO weight load ---
-if hasattr(torch.serialization, "add_safe_globals"):
-    torch.serialization.add_safe_globals([])
-    torch.serialization.add_safe_globals.append("ultralytics.nn.tasks.DetectionModel")
-else:
+try:
+    torch.serialization.add_safe_globals = [
+        "ultralytics.nn.tasks.DetectionModel"
+    ]
+except Exception:
     import contextlib
     @contextlib.contextmanager
     def allow_unsafe_load():
@@ -21,6 +22,7 @@ else:
         torch.serialization._legacy_load = old
     torch.serialization.allow_unsafe_load = allow_unsafe_load
 # ----------------------------------------------------------------------
+
 
 # Path to the Data Model for Weapon Detection - By Gabriel M
 model = YOLO("EVST_DataModelPrototypemk1/runs/detect/train/weights/best.pt")
