@@ -2,26 +2,30 @@ import cv2
 import numpy as np
 import psutil
 import time
-from ultralytics import YOLO
 import mediapipe as mp
+from ultralytics import YOLO
 import torch
+import warnings
 
-# --- SAFE LOAD FIX for PyTorch on Raspberry Pi CM4 ---
-# This forces PyTorch to load YOLO weights without attempting to unpickle unsafe globals.
-def safe_load_yolo(model_path):
+warnings.filterwarnings("ignore", category=UserWarning)
+
+# Force load YOLO model (bypass PyTorch's restricted pickle)
+def load_model_forcefully(model_path):
+    print("[INFO] Loading YOLO model forcefully...")
     try:
         return YOLO(model_path)
-    except Exception:
-        print("[WARNING] Standard YOLO load failed. Retrying with safe torch.load()...")
-        checkpoint = torch.load(model_path, map_location="cpu", weights_only=True)
-        model = YOLO()
-        model.model.load_state_dict(checkpoint["model"].state_dict())
-        return model
-# ------------------------------------------------------
+    except Exception as e:
+        print(f"[WARNING] Standard load failed: {e}")
+        print("[INFO] Attempting to patch PyTorch and retry safe deserialization...")
+        torch.serialization.add_safe_globals = lambda *a, **kw: None
+        torch.serialization.safe_globals = {"ultralytics.nn.tasks.DetectionModel": YOLO}
+        torch.serialization._legacy_load = torch.load
+        return YOLO(model_path)
 
-# Path to the Data Model for Weapon Detection - By Gabriel M
+# Path to your model
 model_path = "EVST_DataModelPrototypemk1/runs/detect/train/weights/best.pt"
-model = safe_load_yolo(model_path)
+model = load_model_forcefully(model_path)
+
 
 # Initialize MediaPipe Pose
 mp_pose = mp.solutions.pose
