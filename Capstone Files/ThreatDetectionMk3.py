@@ -4,6 +4,8 @@ import psutil
 import time
 from ultralytics import YOLO
 import mediapipe as mp
+import torch  # <-- Add this line
+torch.serialization.add_safe_globals = True  # <-- And this one
 
 # Path to the Data Model for Weapon Detection - By Gabriel M
 model = YOLO("EVST_DataModelPrototypemk1/runs/detect/train/weights/best.pt")
