@@ -4,28 +4,13 @@ import psutil
 import time
 import mediapipe as mp
 from ultralytics import YOLO
-import torch
 import warnings
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
-# Force load YOLO model (bypass PyTorch's restricted pickle)
-def load_model_forcefully(model_path):
-    print("[INFO] Loading YOLO model forcefully...")
-    try:
-        return YOLO(model_path)
-    except Exception as e:
-        print(f"[WARNING] Standard load failed: {e}")
-        print("[INFO] Attempting to patch PyTorch and retry safe deserialization...")
-        torch.serialization.add_safe_globals = lambda *a, **kw: None
-        torch.serialization.safe_globals = {"ultralytics.nn.tasks.DetectionModel": YOLO}
-        torch.serialization._legacy_load = torch.load
-        return YOLO(model_path)
-
-# Path to your model
-model_path = "EVST_DataModelPrototypemk1/runs/detect/train/weights/best.pt"
-model = load_model_forcefully(model_path)
-
+# Path to your TorchScript-safe model
+print("[INFO] Loading YOLO TorchScript model...")
+model = YOLO("EVST_DataModelPrototypemk1/runs/detect/train/weights/best.torchscript")
 
 # Initialize MediaPipe Pose
 mp_pose = mp.solutions.pose
