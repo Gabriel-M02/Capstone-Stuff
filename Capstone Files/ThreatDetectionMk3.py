@@ -5,8 +5,22 @@ import time
 from ultralytics import YOLO
 import mediapipe as mp
 import torch
-torch.serialization.add_safe_globals = []
-torch.serialization.add_safe_globals.append("ultralytics.nn.tasks.DetectionModel")
+import torch.serialization
+
+# --- Fix for PyTorch 'unsupported global' error on YOLO weight load ---
+if hasattr(torch.serialization, "add_safe_globals"):
+    torch.serialization.add_safe_globals([])
+    torch.serialization.add_safe_globals.append("ultralytics.nn.tasks.DetectionModel")
+else:
+    import contextlib
+    @contextlib.contextmanager
+    def allow_unsafe_load():
+        old = torch.serialization._legacy_load
+        torch.serialization._legacy_load = lambda *a, **kw: old(*a, **kw)
+        yield
+        torch.serialization._legacy_load = old
+    torch.serialization.allow_unsafe_load = allow_unsafe_load
+# ----------------------------------------------------------------------
 
 # Path to the Data Model for Weapon Detection - By Gabriel M
 model = YOLO("EVST_DataModelPrototypemk1/runs/detect/train/weights/best.pt")
