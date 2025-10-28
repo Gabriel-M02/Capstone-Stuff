@@ -13,7 +13,8 @@ cv2.setNumThreads(2)
 
 # --- Load YOLO model ---
 print("[INFO] Loading YOLO model...")
-model = YOLO("EVST_DataModelPrototypemk1/runs/detect/train/weights/best.torchscript")
+model = YOLO("EVST_DataModelMk2/runs/detect/train/weights/best.torchscript")
+# model = YOLO("EVST_DataModelMk2/runs/detect/train/weights/best.pt")
 
 # --- Battery HUD (with fallback) ---
 def draw_battery_status(frame, x_offset, y_offset, scale=1.0):
@@ -48,40 +49,41 @@ def draw_battery_status(frame, x_offset, y_offset, scale=1.0):
     cv2.putText(frame, text, (x_offset - int(60 * scale), y_offset + int(22 * scale)),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.6 * scale, (0, 255, 255), 2)
 
+
 # --- HUD Overlay ---
 def draw_hud(display_frame, fps):
     h, w, _ = display_frame.shape
     font_scale = max(0.6, w / 1280)
     font = cv2.FONT_HERSHEY_SIMPLEX
 
-    # Title
     cv2.putText(display_frame, f"EVST NVG HUD MK2 - {time.strftime('%H:%M:%S')}",
                 (int(0.03 * w), int(0.08 * h)), font, font_scale, (0, 255, 255), 2)
-    # FPS
     cv2.putText(display_frame, f"FPS: {int(fps)}",
                 (int(0.03 * w), int(0.95 * h)), font, font_scale, (0, 255, 0), 2)
-    # Battery
     draw_battery_status(display_frame, int(0.82 * w), int(0.05 * h), scale=font_scale * 1.4)
 
+
 # --- Detection Function ---
-def detect_guns(frame, threshold=0.6):
+def detect_weapons(frame, threshold=0.6):
     frame = cv2.convertScaleAbs(frame, alpha=1.3, beta=15)
     results = model.predict(source=frame, imgsz=320, conf=threshold, verbose=False)
     boxes = results[0].boxes
 
     detections = []
     hostile_detected = False
+    HOSTILE_CLASSES = [0, 1, 2]  # Nerf_Blaster, Knife, Scissors
 
     if boxes is not None and boxes.data.numel() > 0:
         data = boxes.data.cpu().numpy()
         for det in data:
             x1, y1, x2, y2, conf, cls = det
             detections.append((int(x1), int(y1), int(x2), int(y2), float(conf), int(cls)))
-            # Only mark hostile if a Nerf gun (class 0) is detected
-            if int(cls) == 0 and float(conf) > threshold:
+
+            if int(cls) in HOSTILE_CLASSES and float(conf) > threshold:
                 hostile_detected = True
 
     return hostile_detected, detections
+
 
 # --- Initialize Camera ---
 cap = cv2.VideoCapture(0)
@@ -96,8 +98,7 @@ prev_gray = None
 tracking_box = None
 tracking_points = None
 
-# --- Hostility stabilization parameters ---
-HOSTILE_HOLD_TIME = 1.5  # seconds to keep HOSTILE after last detection
+HOSTILE_HOLD_TIME = 1
 last_hostile_time = 0
 is_hostile = False
 
@@ -112,9 +113,9 @@ while True:
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     frame_count += 1
 
-    # Run YOLO detection every 8 frames
+    # Run YOLO detection every few frames
     if frame_count % 8 == 0 or tracking_points is None:
-        hostile_now, detections = detect_guns(frame)
+        hostile_now, detections = detect_weapons(frame)
         if hostile_now:
             last_hostile_time = time.time()
             is_hostile = True
@@ -122,6 +123,8 @@ while True:
             is_hostile = False
 
         if len(detections) > 0:
+            # Choose the most confident detection
+            detections.sort(key=lambda x: x[4], reverse=True)
             x1, y1, x2, y2, conf, cls = detections[0]
             tracking_box = (x1, y1, x2, y2)
             mask = np.zeros_like(gray)
@@ -144,11 +147,17 @@ while True:
     prev_gray = gray.copy()
     tracking_points = cv2.goodFeaturesToTrack(gray, mask=None, maxCorners=80, qualityLevel=0.3, minDistance=7)
 
-    # Draw detection box with stabilized status
+    # Draw box + weapon label
     if tracking_box:
         x1, y1, x2, y2 = tracking_box
         color = (0, 0, 255) if is_hostile else (0, 255, 0)
         label = "HOSTILE" if is_hostile else "FRIENDLY"
+
+        if len(detections) > 0:
+            _, _, _, _, conf, cls = detections[0]
+            weapon_name = ["Nerf_Blaster", "Knife", "Scissors"][int(cls)]
+            label = f"{label} ({weapon_name})"
+
         cv2.rectangle(display, (x1, y1), (x2, y2), color, 2)
         cv2.putText(display, label, (x1, y1 - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
@@ -165,7 +174,6 @@ while True:
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
-
 
 cap.release()
 cv2.destroyAllWindows()
