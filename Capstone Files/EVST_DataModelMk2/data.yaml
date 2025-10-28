@@ -1,6 +1,5 @@
-train: ../train/images
-val: ../valid/images
-test: ../test/images
+train: C:/Users/black/OneDrive/Python Stuff GM/Capstone Stuff/Capstone Files/EVST_DataModelMk2/train/images
+val: C:/Users/black/OneDrive/Python Stuff GM/Capstone Stuff/Capstone Files/EVST_DataModelMk2/train/images  # reuse training data
 
 nc: 3
 names: ['Nerf_Blaster', 'knife', 'scissors']
